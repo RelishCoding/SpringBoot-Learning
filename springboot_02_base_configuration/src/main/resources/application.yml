@@ -1,0 +1,56 @@
+server:
+  port: 81
+
+country: china
+province: beijing
+city: beijing
+area: haidian
+
+party: true
+birthday: 1949-10-01
+
+user:
+  username: itcast
+  age: 16
+
+user2:
+  username: itcast
+  age: 16
+
+likes:
+  - game
+  - music
+  - sleep
+
+likes2: [game,music,sleep]
+
+users:
+  - name: zhangsan
+    age: 18
+  - name: lisi
+    age: 17
+
+users2:
+  -
+    name: zhangsan
+    age: 18
+  -
+    name: lisi
+    age: 17
+
+users3: [{name:zhangsan,age;18},{name:lisi,age:17}]
+
+basedir: c:\windows
+# 使用${属性名}引用数据
+tempDir: ${basedir}\tmp
+# 使用引号包裹的字符串，其中的转义字符可以生效
+tempDir2: "${basedir}\tmp"
+
+# 创建类，用于封装下面的数据
+# 由Spring帮我们加载数据到对象中，一定要告诉Spring加载这组信息
+# 使用时候从Spring中直接获取信息使用
+datasource:
+  driver: com.mysql.jdbc.Driver
+  url: jdbc:mysql://localhost/springboot_db
+  username: root
+  password: root666
