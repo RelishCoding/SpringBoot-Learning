@@ -1159,14 +1159,14 @@ server:
 
 ## 3、yaml文件
 
-​	SpringBoot的配置以后主要使用yml结尾的这种文件格式，并且在书写时可以通过提示的形式加载正确的格式。但是这种文件还是有严格的书写格式要求的。下面就来说一下具体的语法格式。
+SpringBoot 的配置以后主要使用 yml 结尾的这种文件格式，并且在书写时可以通过提示的形式加载正确的格式。但是这种文件还是有严格的书写格式要求的。下面就来说一下具体的语法格式。
 
-​	YAML（YAML Ain't Markup Language），一种数据序列化格式。具有容易阅读、容易与脚本语言交互、以数据为核心，重数据轻格式的特点。常见的文件扩展名有两种：
+YAML（YAML Ain't Markup Language），一种数据序列化格式。具有容易阅读、容易与脚本语言交互、以数据为核心，重数据轻格式的特点。常见的文件扩展名有两种：
 
-- .yml格式（主流）
-- .yaml格式
+- .yml 格式（主流）
+- .yaml 格式
 
-   对于文件自身在书写时，具有严格的语法格式要求，具体如下：
+对于文件自身在书写时，具有严格的语法格式要求，具体如下：
 
 1. 大小写敏感
 2. 属性层级关系使用多行描述，**每行结尾使用冒号结束**
@@ -1174,9 +1174,9 @@ server:
 4. 属性值前面添加空格（属性名与属性值之间使用冒号+空格作为分隔）
 5. #号 表示注释
 
-  上述规则不要死记硬背，按照书写习惯慢慢适应，并且在Idea下由于具有提示功能，慢慢适应着写格式就行了。核心的一条规则要记住，<font color="#ff0000"><b>数据前面要加空格与冒号隔开</b></font>
+ 上述规则不要死记硬背，按照书写习惯慢慢适应，并且在 Idea 下由于具有提示功能，慢慢适应着写格式就行了。核心的一条规则要记住，<font color="#ff0000"><b>数据前面要加空格与冒号隔开</b></font>
 
-​	下面列出常见的数据书写格式，熟悉一下
+下面列出常见的数据书写格式，熟悉一下
 
 ```YAML
 boolean: TRUE  						#TRUE,true,True,FALSE,false，False均可
@@ -1184,39 +1184,62 @@ float: 3.14    						#6.8523015e+5  #支持科学计数法
 int: 123       						#0b1010_0111_0100_1010_1110    #支持二进制、八进制、十六进制
 null: ~        						#使用~表示null
 string: HelloWorld      			#字符串可以直接书写
-string2: "Hello World"  			#可以使用双引号包裹特殊字符
+string2: "Hello World"  			#可以使用双引号包裹特殊字符，字符串中间有空格时必须加引号
 date: 2018-02-17        			#日期必须使用yyyy-MM-dd格式
 datetime: 2018-02-17T15:02:31+08:00  #时间和日期之间使用T连接，最后使用+代表时区
 ```
 
-​	此外，yaml格式中也可以表示数组，在属性名书写位置的下方使用减号作为数据开始符号，每行书写一个数据，减号与数据间空格分隔
+此外，yaml 格式中也可以表示数组，在属性名书写位置的下方使用减号作为数据开始符号，每行书写一个数据，减号与数据间空格分隔
 
 ```YAML
-subject:
-	- Java
-	- 前端
-	- 大数据
+server:
+  port: 81
+
+country: china
+province: beijing
+city: beijing
+area: haidian
+party: true
+birthday: 1949-10-01
+
+user:
+  username: itcast
+  age: 16
+
+user2:
+  username: itcast
+  age: 16
+
+likes:
+  - game
+  - music
+  - sleep
+
+likes2: [game,music,sleep]     #数组书写缩略格式
+
+users:                         #对象数组格式一
+  - name: zhangsan
+    age: 18
+  - name: lisi
+    age: 17
+
+users2:                        #对象数组格式二
+  -
+    name: zhangsan
+    age: 18
+  -
+    name: lisi
+    age: 17
+
+users3: [{name:zhangsan,age;18},{name:lisi,age:17}]  #对象数组缩略格式
+
 enterprise:
 	name: itcast
     age: 16
-    subject:
+    subject2:
     	- Java
         - 前端
-        - 大数据
-likes: [王者荣耀,刺激战场]			#数组书写缩略格式
-users:							 #对象数组格式一
-  - name: Tom
-   	age: 4
-  - name: Jerry
-    age: 5
-users:							 #对象数组格式二
-  -  
-    name: Tom
-    age: 4
-  -   
-    name: Jerry
-    age: 5			    
-users2: [ { name:Tom , age:4 } , { name:Jerry , age:5 } ]	#对象数组缩略格式
+        - 大数据	
 ```
 
 **总结**
@@ -1232,70 +1255,96 @@ users2: [ { name:Tom , age:4 } , { name:Jerry , age:5 } ]	#对象数组缩略格
 
 **思考**
 
-​	现在我们已经知道了yaml具有严格的数据格式要求，并且已经可以正确的书写yaml文件了，那这些文件书写后其实是在定义一些数据。这些数据时给谁用的呢？大部分是SpringBoot框架内部使用，但是如果我们想配置一些数据自己使用，能不能用呢？答案是可以的，那如何读取yaml文件中的数据呢？咱们下一节再说。
-
-
+现在我们已经知道了 yaml 具有严格的数据格式要求，并且已经可以正确的书写 yaml 文件了，那这些文件书写后其实是在定义一些数据。这些数据时给谁用的呢？大部分是 SpringBoot 框架内部使用，但是如果我们想配置一些数据自己使用，能不能用呢？答案是可以的，那如何读取 yaml 文件中的数据呢？咱们下一节再说。
 
 ## 4、yaml数据读取
 
-​	对于yaml文件中的数据，其实你就可以想象成这就是一个小型的数据库，里面保存有若干数据，每个数据都有一个独立的名字，如果你想读取里面的数据，肯定是支持的，下面就介绍3种读取数据的方式
+对于 yaml 文件中的数据，其实你就可以想象成这就是一个小型的数据库，里面保存有若干数据，每个数据都有一个独立的名字，如果你想读取里面的数据，肯定是支持的，下面就介绍 3 种读取数据的方式
 
-#### 读取单一数据
+### 读取单一数据
 
-​	yaml中保存的单个数据，可以使用Spring中的注解直接读取，使用@Value可以读取单个数据，属性名引用方式：<font color="#ff0000"><b>${一级属性名.二级属性名……}</b></font>
+yaml 中保存的单个数据，可以使用 Spring 中的注解直接读取，使用 @Value 可以读取单个数据，属性名引用方式：<font color="#ff0000"><b>${一级属性名.二级属性名……}</b></font>
 
-<img src="img\image-20211126180433356.png" alt="image-20211126180433356" style="zoom:80%;" />
+<img src="img\image30.png" alt="image30" style="zoom:80%;" />
 
-​	记得使用@Value注解时，要将该注入写在某一个指定的Spring管控的bean的属性名上方。现在就可以读取到对应的单一数据行了
+记得使用 @Value 注解时，要将该注入写在某一个指定的 Spring 管控的 bean 的属性名上方。现在就可以读取到对应的单一数据行了
+
+```java
+//Rest模式
+@RestController
+@RequestMapping("/books")
+public class BookController {
+    //读取yaml数据中的单一数据
+    @Value("${country}")
+    private String country1;
+
+    @Value("${user.username}")
+    private String name1;
+
+    @Value("${likes[1]}")
+    private String likes1;
+
+    @Value("${users[1].age}")
+    private String age1;
+
+    @Value("${server.port}")
+    private String port;
+
+    @GetMapping
+    public String getById(){
+        System.out.println("springboot is running...");
+        System.out.println("country1===>"+country1);
+        System.out.println("name1===>"+name1);
+        System.out.println("likes1===>"+likes1);
+        System.out.println("age1===>"+age1);
+        System.out.println("port===>"+port);
+        return "springboot is running...";
+    }
+}
+```
 
 **总结**
 
-1. 使用@Value配合SpEL读取单个数据
+1. 使用 @Value 配合 SpEL 读取单个数据
 2. 如果数据存在多层级，依次书写层级名称即可
 
+### 读取全部数据
 
+读取单一数据可以解决读取数据的问题，但是如果定义的数据量过大，这么一个一个书写肯定会累死人的，SpringBoot 提供了一个对象，能够把所有的数据都封装到这一个对象中，这个对象叫做 Environment，使用自动装配注解可以将所有的 yaml 数据封装到这个对象中
 
-#### 读取全部数据
+<img src="img\image31.png" alt="image31" style="zoom:80%;" />
 
-​	读取单一数据可以解决读取数据的问题，但是如果定义的数据量过大，这么一个一个书写肯定会累死人的，SpringBoot提供了一个对象，能够把所有的数据都封装到这一个对象中，这个对象叫做Environment，使用自动装配注解可以将所有的yaml数据封装到这个对象中
-
-<img src="img\image-20211126180738569.png" alt="image-20211126180738569" style="zoom:80%;" />
-
-​	数据封装到了Environment对象中，获取属性时，通过Environment的接口操作进行，具体方法时getProperties（String），参数填写属性名即可
+数据封装到了 Environment 对象中，获取属性时，通过 Environment 的接口操作进行，具体方法是`getProperties(String)`，参数填写属性名即可
 
 **总结**
 
-1. 使用Environment对象封装全部配置信息
-2. 使用@Autowired自动装配数据到Environment对象中
+1. 使用 Environment 对象封装全部配置信息
+2. 使用 @Autowired 自动装配数据到 Environment 对象中
 
+### 读取对象数据
 
+单一数据读取书写比较繁琐，全数据封装又封装的太厉害了，每次拿数据还要一个一个的 getProperties()，总之用起来都不是很舒服。由于 Java 是一个面向对象的语言，很多情况下，我们会将一组数据封装成一个对象。SpringBoot 也提供了可以将一组 yaml 对象数据封装成一个 Java 对象的操作
 
-#### 读取对象数据
+首先定义一个对象，并将该对象纳入 Spring 管控的范围，也就是定义成一个 bean，即使用 @Component 注解。然后使用注解 @ConfigurationProperties 指定该对象加载哪一组 yaml 中配置的信息。
 
-​	单一数据读取书写比较繁琐，全数据封装又封装的太厉害了，每次拿数据还要一个一个的getProperties（）,总之用起来都不是很舒服。由于Java是一个面向对象的语言，很多情况下，我们会将一组数据封装成一个对象。SpringBoot也提供了可以将一组yaml对象数据封装一个Java对象的操作
+<img src="img\image32.png" alt="image32" style="zoom:80%;" />
 
-​	首先定义一个对象，并将该对象纳入Spring管控的范围，也就是定义成一个bean，然后使用注解@ConfigurationProperties指定该对象加载哪一组yaml中配置的信息。
+这个 @ConfigurationProperties 必须告诉他加载的数据前缀是什么，这样当前前缀下的所有属性就封装到这个对象中。记得数据属性名要与对象的变量名一一对应啊，不然没法封装。其实以后如果你要定义一组数据自己使用，就可以先写一个对象，然后定义好属性，下面到配置中根据这个格式书写即可。
 
-<img src="img\image-20211126181126382.png" alt="image-20211126181126382" style="zoom:80%;" />
+​	<img src="img\image33.png" alt="image33" style="zoom:80%;" />
 
-​	这个@ConfigurationProperties必须告诉他加载的数据前缀是什么，这样当前前缀下的所有属性就封装到这个对象中。记得数据属性名要与对象的变量名一一对应啊，不然没法封装。其实以后如果你要定义一组数据自己使用，就可以先写一个对象，然后定义好属性，下面到配置中根据这个格式书写即可。
+<font color="#f0f"><b>温馨提示</b></font>
 
-​	<img src="img\image-20211126181423432.png" alt="image-20211126181423432" style="zoom:80%;" />
-
-​	<font color="#f0f"><b>温馨提示</b></font>
-
-​		细心的小伙伴会发现一个问题，自定义的这种数据在yaml文件中书写时没有弹出提示，是这样的，咱们到原理篇再揭秘如何弹出提示。
+细心的小伙伴会发现一个问题，自定义的这种数据在 yaml 文件中书写时没有弹出提示，是这样的，咱们到原理篇再揭秘如何弹出提示。
 
 **总结**
 
 1. 使用@ConfigurationProperties注解绑定配置信息到封装类中
 2. 封装类需要定义为Spring管理的bean，否则无法进行属性注入
 
+### yaml文件中的数据引用
 
-
-#### yaml文件中的数据引用
-
-​	如果你在书写yaml数据时，经常出现如下现象，比如很多个文件都具有相同的目录前缀
+如果你在书写 yaml 数据时，经常出现如下现象，比如很多个文件都具有相同的目录前缀
 
 ```YAML
 center:
@@ -1315,18 +1364,19 @@ center:
     msgDir: D:/usr/local/fire/msgDir
 ```
 
-​	这个时候你可以使用引用格式来定义数据，其实就是搞了个变量名，然后引用变量了，格式如下：
+这个时候你可以使用引用格式来定义数据，其实就是搞了个变量名，然后引用变量了，格式如下：
 
 ```YAML
 baseDir: /usr/local/fire
-	center:
+
+center:
     dataDir: ${baseDir}/data
     tmpDir: ${baseDir}/tmp
     logDir: ${baseDir}/log
     msgDir: ${baseDir}/msgDir
 ```
 
-​	还有一个注意事项，在书写字符串时，如果需要使用转义字符，需要将数据字符串使用双引号包裹起来
+还有一个注意事项，在书写字符串时，如果需要使用转义字符，需要将数据字符串使用双引号包裹起来
 
 ```YAML
 lesson: "Spring\tboot\nlesson"
@@ -1334,14 +1384,10 @@ lesson: "Spring\tboot\nlesson"
 
 **总结**
 
-1. 在配置文件中可以使用${属性名}方式引用属性值
+1. 在配置文件中可以使用 **${属性名}** 方式引用属性值
 2. 如果属性中出现特殊字符，可以使用双引号包裹起来作为字符解析
 
-
-
-​	到这里有关yaml文件的基础使用就先告一段落，在实用篇中再继续研究更深入的内容。
-
-
+到这里有关 yaml 文件的基础使用就先告一段落，在实用篇中再继续研究更深入的内容。
 
 # 三、基于SpringBoot实现SSMP整合
 
