@@ -1402,11 +1402,11 @@ lesson: "Spring\tboot\nlesson"
 
 
 
-### JC-3-1.整合JUnit
+## 1、整合JUnit
 
-​	SpringBoot技术的定位用于简化开发，再具体点是简化Spring程序的开发。所以在整合任意技术的时候，如果你想直观感触到简化的效果，你必须先知道使用非SpringBoot技术时对应的整合是如何做的，然后再看基于SpringBoot的整合是如何做的，才能比对出来简化在了哪里。
+SpringBoot 技术的定位用于简化开发，再具体点是简化 Spring 程序的开发。所以在整合任意技术的时候，如果你想直观感触到简化的效果，你必须先知道使用非 SpringBoot 技术时对应的整合是如何做的，然后再看基于SpringBoot 的整合是如何做的，才能比对出来简化在了哪里。
 
-​	我们先来看一下不使用SpringBoot技术时，Spring整合JUnit的制作方式
+我们先来看一下不使用 SpringBoot 技术时，Spring 整合 JUnit 的制作方式
 
 ```JAVA
 //加载spring整合junit专用的类运行器
@@ -1417,6 +1417,7 @@ public class AccountServiceTestCase {
     //注入你要测试的对象
     @Autowired
     private AccountService accountService;
+    
     @Test
     public void testGetById(){
         //执行要测试的对象对应的方法
@@ -1426,9 +1427,9 @@ public class AccountServiceTestCase {
 
 ```
 
-​	其中核心代码是前两个注解，第一个注解@RunWith是设置Spring专用于测试的类运行器，简单说就是Spring程序执行程序有自己的一套独立的运行程序的方式，不能使用JUnit提供的类运行方式了，必须指定一下，但是格式是固定的，琢磨一下，<font color="#ff0000"><b>每次都指定一样的东西，这个东西写起来没有技术含量啊</b></font>，第二个注解@ContextConfiguration是用来设置Spring核心配置文件或配置类的，简单说就是加载Spring的环境你要告诉Spring具体的环境配置是在哪里写的，虽然每次加载的文件都有可能不同，但是仔细想想，如果文件名是固定的，这个貌似也是一个固定格式。似然<font color="#ff0000"><b>有可能是固定格式，那就有可能每次都写一样的东西，也是一个没有技术含量的内容书写</b></font>
+其中核心代码是前两个注解，第一个注解 @RunWith 是设置 Spring 专用于测试的类运行器，简单说就是 Spring 程序执行程序有自己的一套独立的运行程序的方式，不能使用 JUnit 提供的类运行方式了，必须指定一下，但是格式是固定的，琢磨一下，<font color="#ff0000"><b>每次都指定一样的东西，这个东西写起来没有技术含量啊</b></font>，第二个注解@ContextConfiguration 是用来设置 Spring 核心配置文件或配置类的，简单说就是加载 Spring 的环境你要告诉Spring 具体的环境配置是在哪里写的，虽然每次加载的文件都有可能不同，但是仔细想想，如果文件名是固定的，这个貌似也是一个固定格式。既然<font color="#ff0000"><b>有可能是固定格式，那就有可能每次都写一样的东西，也是一个没有技术含量的内容书写</b></font>
 
-​	SpringBoot就抓住上述两条没有技术含量的内容书写进行开发简化，能走默认值的走默认值，能不写的就不写，具体格式如下
+SpringBoot 就抓住上述两条没有技术含量的内容书写进行开发简化，能走默认值的走默认值，能不写的就不写，具体格式如下
 
 ```JAVA
 @SpringBootTest
@@ -1436,6 +1437,7 @@ class Springboot04JunitApplicationTests {
     //注入你要测试的对象
     @Autowired
     private BookDao bookDao;
+    
     @Test
     void contextLoads() {
         //执行要测试的对象对应的方法
@@ -1445,9 +1447,13 @@ class Springboot04JunitApplicationTests {
 }
 ```
 
-​	看看这次简化成什么样了，一个注解就搞定了，而且还没有参数，再体会SpringBoot整合其他技术的优势在哪里，就两个字——<font color="#ff0000"><b>简化</b></font>。使用一个注解@SpringBootTest替换了前面两个注解。至于内部是怎么回事？和之前一样，只不过都走默认值。
+看看这次简化成什么样了，一个注解就搞定了，而且还没有参数，再体会 SpringBoot 整合其他技术的优势在哪里，就两个字——<font color="#ff0000"><b>简化</b></font>。使用一个测试类注解 @SpringBootTest 替换了前面两个注解。至于内部是怎么回事？和之前一样，只不过都走默认值。
 
-​	这个时候有人就问了，你加载的配置类或者配置文件是哪一个？就是我们前面启动程序使用的引导类。如果想手工指定引导类有两种方式，第一种方式使用属性的形式进行，在注解@SpringBootTest中添加classes属性指定配置类
+@SpringBootTest 注解的位置：测试类定义上方，作用：设置 JUnit 加载的 SpringBoot 启动类。
+
+这个时候有人就问了，你加载的配置类或者配置文件是哪一个？就是我们前面启动程序使用的引导类。如果想手工指定引导类有两种方式：
+
+第一种方式使用属性的形式进行，在注解 @SpringBootTest 中添加 classes 属性指定配置类
 
 ```JAVA
 @SpringBootTest(classes = Springboot04JunitApplication.class)
@@ -1464,7 +1470,7 @@ class Springboot04JunitApplicationTests {
 }
 ```
 
-​	第二种方式回归原始配置方式，仍然使用@ContextConfiguration注解进行，效果是一样的
+第二种方式回归原始配置方式，仍然使用 @ContextConfiguration 注解进行，效果是一样的
 
 ```JAVA
 @SpringBootTest
@@ -1482,23 +1488,21 @@ class Springboot04JunitApplicationTests {
 }
 ```
 
-​	<font color="#f0f"><b>温馨提示</b></font>
+<font color="#f0f"><b>温馨提示</b></font>
 
-​		使用SpringBoot整合JUnit需要保障导入test对应的starter，由于初始化项目时此项是默认导入的，所以此处没有提及，其实和之前学习的内容一样，用什么技术导入对应的starter即可。
+使用 SpringBoot 整合 JUnit 需要保障导入 test 对应的 starter，由于初始化项目时此项是默认导入的，所以此处没有提及，其实和之前学习的内容一样，用什么技术导入对应的 starter 即可。
 
 **总结**
 
-1. 导入测试对应的starter
-2. 测试类使用@SpringBootTest修饰
+1. 导入测试对应的 starter
+2. 测试类使用 @SpringBootTest修饰
 3. 使用自动装配的形式添加要测试的对象
 4. 测试类如果存在于引导类所在包或子包中无需指定引导类
-5. 测试类如果不存在于引导类所在的包或子包中需要通过classes属性指定引导类
+5. 测试类如果不存在于引导类所在的包或子包中需要通过 classes 属性指定引导类
 
+## 2、整合MyBatis
 
-
-### JC-3-2.整合MyBatis
-
-​	整合完JUnit下面再来说一下整合MyBatis，这个技术是大部分公司都要使用的技术，务必掌握。如果对Spring整合MyBatis不熟悉的小伙伴好好复习一下，下面列举出原始整合的全部内容，以配置类的形式为例进行
+整合完 JUnit 下面再来说一下整合MyBatis，这个技术是大部分公司都要使用的技术，务必掌握。如果对Spring整合MyBatis不熟悉的小伙伴好好复习一下，下面列举出原始整合的全部内容，以配置类的形式为例进行
 
 - 导入坐标，MyBatis坐标不能少，Spring整合MyBatis还有自己专用的坐标，此外Spring进行数据库操作的jdbc坐标是必须的，剩下还有mysql驱动坐标，本例中使用了Druid数据源，这个倒是可以不要
 
@@ -1734,7 +1738,7 @@ Loading class `com.mysql.jdbc.Driver'. This is deprecated. The new driver class 
 
    
 
-### JC-3-3.整合MyBatis-Plus
+## 3、整合MyBatis-Plus
 
 ​	做完了两种技术的整合了，各位小伙伴要学会总结，我们做这个整合究竟哪些是核心？总结下来就两句话
 
@@ -1820,7 +1824,7 @@ mybatis-plus:
 
 
 
-### JC-3-4.整合Druid
+## 4、整合Druid
 
 ​	使用SpringBoot整合了3个技术了，发现套路基本相同，导入对应的starter，然后做配置，各位小伙伴需要一直强化这套思想。下面再整合一个技术，继续深入强化此思想。
 
@@ -1921,7 +1925,7 @@ spring:
 
 
 
-### JC-3-5.SSMP整合综合案例
+## 5、SSMP整合综合案例
 
 ​	SpringBoot能够整合的技术太多太多了，对于初学者来说慢慢来，一点点掌握。前面咱们做了4个整合了，下面就通过一个稍微综合一点的案例，将所有知识贯穿起来，同时做一个小功能，体会一下。不过有言在先，这个案例制作的时候，你可能会有这种感觉，说好的SpringBoot整合其他技术的案例，为什么感觉SpringBoot整合其他技术的身影不多呢？因为这东西书写太简单了，简单到瞬间写完，大量的时间做的不是这些整合工作。
 
