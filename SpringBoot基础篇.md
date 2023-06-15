@@ -1339,8 +1339,8 @@ public class BookController {
 
 **总结**
 
-1. 使用@ConfigurationProperties注解绑定配置信息到封装类中
-2. 封装类需要定义为Spring管理的bean，否则无法进行属性注入
+1. 使用 @ConfigurationProperties 注解绑定配置信息到封装类中
+2. 封装类需要定义为 Spring 管理的 bean，否则无法进行属性注入
 
 ### yaml文件中的数据引用
 
@@ -1391,16 +1391,15 @@ lesson: "Spring\tboot\nlesson"
 
 # 三、基于SpringBoot实现SSMP整合
 
-​	重头戏来了，SpringBoot之所以好用，就是它能方便快捷的整合其他技术，这一部分咱们就来聊聊一些技术的整合方式，通过这一章的学习，大家能够感受到SpringBoot到底有多酷炫。这一章咱们学习如下技术的整合方式
+重头戏来了，SpringBoot 之所以好用，就是它能方便快捷的整合其他技术，这一部分咱们就来聊聊一些技术的整合方式，通过这一章的学习，大家能够感受到 SpringBoot 到底有多酷炫。这一章咱们学习如下技术的整合方式
 
-- 整合JUnit
-- 整合MyBatis
-- 整合MyBatis-Plus
-- 整合Druid
-
-   上面这些技术都整合完毕后，我们做一个小案例，也算是学有所用吧。涉及的技术比较多，综合运用一下。
+- 整合 JUnit
+- 整合 MyBatis
+- 整合 MyBatis-Plus
+- 整合 Druid
 
 
+上面这些技术都整合完毕后，我们做一个小案例，也算是学有所用吧。涉及的技术比较多，综合运用一下。
 
 ## 1、整合JUnit
 
@@ -1502,9 +1501,9 @@ class Springboot04JunitApplicationTests {
 
 ## 2、整合MyBatis
 
-整合完 JUnit 下面再来说一下整合MyBatis，这个技术是大部分公司都要使用的技术，务必掌握。如果对Spring整合MyBatis不熟悉的小伙伴好好复习一下，下面列举出原始整合的全部内容，以配置类的形式为例进行
+整合完 JUnit 下面再来说一下整合 MyBatis，这个技术是大部分公司都要使用的技术，务必掌握。如果对 Spring 整合 MyBatis 不熟悉的小伙伴好好复习一下，下面列举出原始整合的全部内容，以配置类的形式为例进行
 
-- 导入坐标，MyBatis坐标不能少，Spring整合MyBatis还有自己专用的坐标，此外Spring进行数据库操作的jdbc坐标是必须的，剩下还有mysql驱动坐标，本例中使用了Druid数据源，这个倒是可以不要
+- 导入坐标，MyBatis 坐标不能少，Spring 整合 MyBatis 还有自己专用的坐标，此外 Spring 进行数据库操作的jdbc 坐标是必须的，剩下还有 mysql 驱动坐标，本例中使用了 Druid 数据源，这个倒是可以不要
 
   ```XML
   <dependencies>
@@ -1538,7 +1537,7 @@ class Springboot04JunitApplicationTests {
   </dependencies>
   ```
 
-- Spring核心配置
+- Spring 核心配置
 
   ```JAVA
   @Configuration
@@ -1548,13 +1547,13 @@ class Springboot04JunitApplicationTests {
   }
   ```
 
-- MyBatis要交给Spring接管的bean
+- MyBatis 要交给 Spring接管的 bean
 
   ```JAVA
   //定义mybatis专用的配置类
   @Configuration
   public class MyBatisConfig {
-  //    定义创建SqlSessionFactory对应的bean
+  	//定义创建SqlSessionFactory对应的bean
       @Bean
       public SqlSessionFactoryBean sqlSessionFactory(DataSource dataSource){
           //SqlSessionFactoryBean是由mybatis-spring包提供的，专用于整合用的对象
@@ -1565,18 +1564,18 @@ class Springboot04JunitApplicationTests {
           sfb.setTypeAliasesPackage("com.itheima.domain");
           return sfb;
       }
-  //    定义加载所有的映射配置
+  	
+      //定义加载所有的映射配置
       @Bean
       public MapperScannerConfigurer mapperScannerConfigurer(){
           MapperScannerConfigurer msc = new MapperScannerConfigurer();
           msc.setBasePackage("com.itheima.dao");
           return msc;
       }
-  
   }
   ```
 
-- 数据源对应的bean，此处使用Druid数据源
+- 数据源对应的 bean，此处使用 Druid 数据源
 
   ```JAVA
   @Configuration
@@ -1602,7 +1601,7 @@ class Springboot04JunitApplicationTests {
   }
   ```
 
-- 数据库连接信息（properties格式）
+- 数据库连接信息（properties 格式）
 
   ```properties
   jdbc.driver=com.mysql.jdbc.Driver
@@ -1611,15 +1610,16 @@ class Springboot04JunitApplicationTests {
   jdbc.password=root
   ```
 
-  上述格式基本上是简格式了，要写的东西还真不少。下面看看SpringBoot整合MyBaits格式
+
+上述格式基本上是简格式了，要写的东西还真不少。下面看看 SpringBoot 整合 MyBaits 格式
 
 **步骤①**：创建模块时勾选要使用的技术，MyBatis，由于要操作数据库，还要勾选对应数据库
 
-![image-20211129092156020](img\image-20211129092156020.png)
+![image34](img\image34.png)
 
-![image-20211129092210993](img\image-20211129092210993.png)
+![image35](img\image35.png)
 
-​	或者手工导入对应技术的starter，和对应数据库的坐标
+或者手工导入对应技术的 starter，和对应数据库的坐标
 
 ```XML
 <dependencies>
@@ -1650,7 +1650,7 @@ spring:
     password: root
 ```
 
-​	完了，就这么多，没了。有人就很纳闷，这就结束了？对，这就结束了，SpringBoot把配置中所有可能出现的通用配置都简化了。下面就可以写一下MyBatis程序运行需要的Dao（或者Mapper）就可以运行了
+完了，就这么多，没了。有人就很纳闷，这就结束了？对，这就结束了，SpringBoot 把配置中所有可能出现的通用配置都简化了。下面就可以写一下 MyBatis 程序运行需要的 Dao（或者 Mapper ）就可以运行了
 
 **实体类**
 
@@ -1680,6 +1680,7 @@ public interface BookDao {
 class Springboot05MybatisApplicationTests {
     @Autowired
     private BookDao bookDao;
+    
     @Test
     void contextLoads() {
         System.out.println(bookDao.getById(1));
@@ -1687,9 +1688,9 @@ class Springboot05MybatisApplicationTests {
 }
 ```
 
-​	完美，开发从此变的就这么简单。再体会一下SpringBoot如何进行第三方技术整合的，是不是很优秀？具体内部的原理到原理篇再展开讲解
+完美，开发从此变的就这么简单。再体会一下 SpringBoot 如何进行第三方技术整合的，是不是很优秀？具体内部的原理到原理篇再展开讲解
 
-​	<font color="#ff0000"><b>注意</b></font>：当前使用的SpringBoot版本是2.5.4，对应的坐标设置中Mysql驱动使用的是8x版本。当SpringBoot2.4.3（不含）版本之前会出现一个小BUG，就是MySQL驱动升级到8以后要求强制配置时区，如果不设置会出问题。解决方案很简单，驱动url上面添加上对应设置就行了
+<font color="#ff0000"><b>注意</b></font>：当前使用的 SpringBoot 版本是 2.5.4，对应的坐标设置中 Mysql 驱动使用的是 8x 版本。当 SpringBoot2.4.3（不含）版本之前会出现一个小 BUG，就是 MySQL 驱动升级到 8 以后要求强制配置时区，如果不设置会出问题。解决方案很简单，驱动 url 上面添加上对应设置就行了
 
 ```YAML
 #2.配置相关信息
@@ -1701,7 +1702,7 @@ spring:
     password: root
 ```
 
-​	这里设置的UTC是全球标准时间，你也可以理解为是英国时间，中国处在东八区，需要在这个基础上加上8小时，这样才能和中国地区的时间对应的，也可以修改配置不写UTC，写Asia/Shanghai也可以解决这个问题。
+这里设置的 UTC 是全球标准时间，你也可以理解为是英国时间，中国处在东八区，需要在这个基础上加上 8 小时，这样才能和中国地区的时间对应的，也可以修改配置不写 UTC，写 Asia/Shanghai 也可以解决这个问题。
 
 ```YAML
 #2.配置相关信息
@@ -1713,9 +1714,9 @@ spring:
     password: root
 ```
 
-​	如果不想每次都设置这个东西，也可以去修改mysql中的配置文件mysql.ini，在mysqld项中添加default-time-zone=+8:00也可以解决这个问题。其实方式方法很多，这里就说这么多吧。
+如果不想每次都设置这个东西，也可以去修改 mysql 中的配置文件 mysql.ini，在 mysqld 项中添加 default-time-zone=+8:00 也可以解决这个问题。其实方式方法很多，这里就说这么多吧。
 
-​	此外在运行程序时还会给出一个提示，说数据库驱动过时的警告，根据提示修改配置即可，弃用**com.mysql.jdbc.Driver**，换用<font color="#ff0000"><b>com.mysql.cj.jdbc.Driver</b></font>。前面的例子中已经更换了驱动了，在此说明一下。
+此外在运行程序时还会给出一个提示，说数据库驱动过时的警告，根据提示修改配置即可，弃用**com.mysql.jdbc.Driver**，换用 <font color="#ff0000"><b>com.mysql.cj.jdbc.Driver</b></font>。前面的例子中已经更换了驱动了，在此说明一下。
 
 ```tex
 Loading class `com.mysql.jdbc.Driver'. This is deprecated. The new driver class is `com.mysql.cj.jdbc.Driver'. The driver is automatically registered via the SPI and manual loading of the driver class is generally unnecessary.
@@ -1723,20 +1724,19 @@ Loading class `com.mysql.jdbc.Driver'. This is deprecated. The new driver class 
 
 **总结**
 
-1. 整合操作需要勾选MyBatis技术，也就是导入MyBatis对应的starter
+1. 整合操作需要勾选 MyBatis 技术，也就是导入 MyBatis 对应的 starter
 
 2. 数据库连接相关信息转换成配置
 
-3. 数据库SQL映射需要添加@Mapper被容器识别到
+3. 数据库 SQL 映射需要添加 @Mapper 被容器识别到
 
-4. MySQL 8.X驱动强制要求设置时区
+4. MySQL 8.X 驱动强制要求设置时区
 
-   - 修改url，添加serverTimezone设定
-   - 修改MySQL数据库配置
+   - 修改 url，添加 serverTimezone 设定
+   - 修改 MySQL 数据库配置
 
-5. 驱动类过时，提醒更换为com.mysql.cj.jdbc.Driver
+5. 驱动类过时，提醒更换为 com.mysql.cj.jdbc.Driver
 
-   
 
 ## 3、整合MyBatis-Plus
 
