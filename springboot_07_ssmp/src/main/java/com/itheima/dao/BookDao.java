@@ -10,5 +10,4 @@ public interface BookDao extends BaseMapper<Book> {
     /*@Select("select * from tbl_book where id = #{id}")
     Book getById(Integer id);*/
 
-
 }
