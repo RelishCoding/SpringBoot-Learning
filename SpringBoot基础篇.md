@@ -2426,7 +2426,7 @@ void testGetBy2(){
 
 数据层开发告一段落，下面进行业务层开发，其实标准业务层开发很多初学者认为就是调用数据层，怎么说呢？这个理解是没有大问题的，更精准的说法应该是<font color="#ff0000"><b>组织业务逻辑功能，并根据业务需求，对数据持久层发起调用</b></font>。有什么差别呢？目标是为了组织出符合需求的业务逻辑功能，至于调不调用数据层还真不好说，有需求就调用，没有需求就不调用。
 
-一个常识性的知识普及一下，业务层的方法名定义一定要与业务有关，例如登录操作
+Service 层接口定义与数据层接口定义具有较大区别，不要混用。一个常识性的知识普及一下，业务层的方法名定义一定要与业务有关，例如登录操作
 
 ```JAVA
 login(String username,String password);
@@ -2575,11 +2575,18 @@ public class BookServiceTest {
 
 其实 MP 技术不仅提供了数据层快速开发方案，业务层 MP 也给了一个通用接口 ISerivce\<T> 和 通用实现类ServiceImpl\<M,T>，个人观点不推荐使用，凑合能用吧，其实就是一个封装+继承的思想，代码给出，实际开发慎用
 
+![](img/image47.png)
+
 业务层接口快速开发
 
 ```JAVA
 public interface IBookService extends IService<Book> {
     //添加非通用操作API接口
+    //追加的操作与原始操作通过名称区分，功能类似
+    /*Boolean delete(Integer id);//原操作removeById
+    Boolean insert(Book book);//原操作save
+    Boolean modify(Book book);//原操作updateById
+    Book get(Integer id);*/
 }
 ```
 
@@ -2588,13 +2595,91 @@ public interface IBookService extends IService<Book> {
 ```JAVA
 @Service
 public class IBookServiceImpl extends ServiceImpl<BookDao, Book> implements IBookService {
-    @Autowired
-    private BookDao bookDao;
-	//添加非通用操作API
 }
 ```
 
-如果感觉 MP 提供的功能不足以支撑你的使用需要（其实是一定不能支撑的，因为需求不可能是通用的），在原始接口基础上接着定义新的 API 接口、在通用类基础上做功能重载或功能追加就行了，此处不再说太多了，就是自定义自己的操作了，注意重载时不要覆盖原始操作，避免原始提供的功能丢失，即不要和已有的 API 接口名冲突即可。
+如果感觉 MP 提供的功能不足以支撑你的使用需要（其实是一定不能支撑的，因为需求不可能是通用的），在原始接口基础上接着定义新的 API 接口、在通用类基础上做功能重载或功能追加就行了，此处不再说太多了，就是自定义自己的操作了。注意重载时不要覆盖原始操作，避免原始提供的功能丢失，即不要和已有的 API 接口名冲突即可。
+
+```java
+@Service
+public class IBookServiceImpl extends ServiceImpl<BookDao, Book> implements IBookService {
+    @Autowired
+    private BookDao bookDao;
+    
+	//添加非通用操作API
+    //实现类追加功能
+    public Boolean insert(Book book) {
+    	return bookDao.insert(book) > 0;
+    }
+    public Boolean modify(Book book) {
+    	return bookDao.updateById(book) > 0;
+    }
+    public Boolean delete(Integer id) {
+    	return bookDao.deleteById(id) > 0;
+    }
+    public Book get(Integer id) {
+    	return bookDao.selectById(id);
+    }
+}
+```
+
+测试类定义：
+
+```java
+@SpringBootTest
+public class IBookServiceTestCase {
+    @Autowired
+    private IBookService bookService;
+
+    @Test
+    void testGetById(){
+        System.out.println(bookService.getById(4));
+    }
+
+    @Test
+    void testSave(){
+        Book book = new Book();
+        book.setType("测试数据123");
+        book.setName("测试数据123");
+        book.setDescription("测试数据123");
+        bookService.save(book);
+    }
+
+    @Test
+    void testUpdate(){
+        Book book = new Book();
+        book.setId(53);
+        book.setType("测试数据abcd");
+        book.setName("测试数据123");
+        book.setDescription("测试数据123");
+        bookService.updateById(book);
+    }
+
+    @Test
+    void testDelete(){
+        bookService.removeById(53);
+    }
+
+    @Test
+    void testGetAll(){
+        List<Book> list = bookService.list();
+        for (Book book : list) {
+            System.out.println(book);
+        }
+    }
+
+    @Test
+    void testGetPage(){
+        IPage<Book> page = new Page<>(2,5);
+        bookService.page(page);
+        System.out.println(page.getCurrent());
+        System.out.println(page.getSize());
+        System.out.println(page.getTotal());
+        System.out.println(page.getPages());
+        System.out.println(page.getRecords());
+    }
+}
+```
 
 **总结**
 
@@ -2605,15 +2690,14 @@ public class IBookServiceImpl extends ServiceImpl<BookDao, Book> implements IBoo
 
 ### 6、表现层开发
 
-​	终于做到表现层了，做了这么多都是基础工作。其实你现在回头看看，哪里还有什么SpringBoot的影子？前面1,2步就搞完了。继续完成表现层制作吧，咱们表现层的开发使用基于Restful的表现层接口开发，功能测试通过Postman工具进行
+终于做到表现层了，做了这么多都是基础工作。其实你现在回头看看，哪里还有什么 SpringBoot 的影子？前面 1,2步就搞完了。继续完成表现层制作吧，咱们表现层的开发使用基于 Restful 的表现层接口开发，功能测试通过Postman 工具进行
 
-​	表现层接口如下:
+表现层接口如下:
 
 ```JAVA
 @RestController
 @RequestMapping("/books")
-public class BookController2 {
-
+public class BookController {
     @Autowired
     private IBookService bookService;
 
@@ -2629,12 +2713,12 @@ public class BookController2 {
 
     @PutMapping
     public Boolean update(@RequestBody Book book){
-        return bookService.modify(book);
+        return bookService.updateById(book);
     }
 
     @DeleteMapping("{id}")
     public Boolean delete(@PathVariable Integer id){
-        return bookService.delete(id);
+        return bookService.removeById(id);
     }
 
     @GetMapping("{id}")
@@ -2644,28 +2728,46 @@ public class BookController2 {
 
     @GetMapping("{currentPage}/{pageSize}")
     public IPage<Book> getPage(@PathVariable int currentPage,@PathVariable int pageSize){
-        return bookService.getPage(currentPage,pageSize, null);
+        IPage<Book> page = new Page<>(currentPage,pageSize);
+        bookService.page(page);
+        return page;
     }
 }
 ```
 
-​	在实用Postman测试时关注提交类型，对应上即可，不然就会报405的错误码了
+在实用 Postman 测试时关注提交类型，对应上即可，不然就会报 405 的错误码了
 
-**普通GET请求**
+**普通  GET 请求，查询所有数据**
 
-![image-20211129152237371](img\image-20211129152237371.png)
+![](img/image48.png)
 
-**PUT请求传递json数据，后台实用@RequestBody接收数据**
+**POST 请求传递 json 数据，后台使用 @RequestBody 接收数据，增加数据**
 
-![image-20211129152300177](img\image-20211129152300177.png)
+![](img/image49.png)
 
-**GET请求传递路径变量，后台实用@PathVariable接收数据**
+**PUT 请求传递 json 数据，后台使用 @RequestBody 接收数据，修改数据**
 
-![image-20211129152320073](C:\Users\itcast\AppData\Roaming\Typora\typora-user-images\image-20211129152320073.png)
+![](img/image50.png)
+
+**DELETE 请求传递路径变量，后台使用 @PathVariable 接收数据，删除数据**
+
+![](img/image51.png)
+
+**GET 请求传递路径变量，后台使用 @PathVariable 接收数据，查询单条数据**
+
+![](img/image52.png)
+
+**GET 请求传递路径变量，后台使用 @PathVariable 接收数据，分页查询**
+
+![](img/image53.png)
+
+
+
+![](img/image54.png)
 
 **总结**
 
-1. 基于Restful制作表现层接口
+1. 基于 Restful 制作表现层接口
    - 新增：POST
    - 删除：DELETE
    - 修改：PUT
@@ -2674,19 +2776,17 @@ public class BookController2 {
    - 实体数据：@RequestBody
    - 路径变量：@PathVariable
 
-
-
 ### 7、表现层消息一致性处理
 
-​	目前我们通过Postman测试后业务层接口功能时通的，但是这样的结果给到前端开发者会出现一个小问题。不同的操作结果所展示的数据格式差异化严重
+目前我们通过 Postman 测试后业务层接口功能是通的，但是这样的结果给到前端开发者会出现一个小问题。不同的操作结果所展示的数据格式差异化严重
 
-​	**增删改操作结果**
+**增删改操作结果**
 
 ```tex
 true
 ```
 
-​	**查询单个数据操作结果**
+**查询单个数据操作结果**
 
 ```json
 {
@@ -2697,7 +2797,7 @@ true
 }
 ```
 
-​	**查询全部数据操作结果**
+**查询全部数据操作结果**
 
 ```json
 [
@@ -2716,17 +2816,29 @@ true
 ]
 ```
 
-​	每种不同操作返回的数据格式都不一样，而且还不知道以后还会有什么格式，这样的结果让前端人员看了是很容易让人崩溃的，必须将所有操作的操作结果数据格式统一起来，需要设计表现层返回结果的模型类，用于后端与前端进行数据格式统一，也称为**前后端数据协议**
+每种不同操作返回的数据格式都不一样，而且还不知道以后还会有什么格式，这样的结果让前端人员看了是很容易让人崩溃的，必须将所有操作的操作结果数据格式统一起来，需要设计表现层返回结果的模型类，用于后端与前端进行数据格式统一，也称为**前后端数据协议**
 
 ```JAVA
 @Data
 public class R {
     private Boolean flag;
     private Object data;
+    
+    public R() {
+    }
+
+    public R(Boolean flag) {
+        this.flag = flag;
+    }
+
+    public R(Boolean flag, Object data) {
+        this.flag = flag;
+        this.data = data;
+    }
 }
 ```
 
-​	其中flag用于标识操作是否成功，data用于封装操作数据，现在的数据格式就变了
+​	其中 flag 用于标识操作是否成功，data 用于封装操作数据，现在的数据格式就变了
 
 ```JSON
 {
@@ -2740,15 +2852,52 @@ public class R {
 }
 ```
 
-​	表现层开发格式也需要转换一下
+表现层开发格式也需要转换一下
 
-<img src="img\image-20211129153301262.png" alt="image-20211129153301262" style="zoom:80%;" />
+```java
+@RestController
+@RequestMapping("/books")
+public class BookController {
+    @Autowired
+    private IBookService bookService;
 
-<img src="img\image-20211129153319052.png" alt="image-20211129153319052" style="zoom:80%;" />
+    @GetMapping
+    public R getAll(){
+        return new R(true,bookService.list());
+    }
 
-<img src="img\image-20211129153332499.png" alt="image-20211129153332499" style="zoom:80%;" />
+    @PostMapping
+    public R save(@RequestBody Book book){
+        /*R r = new R();
+        boolean flag = bookService.save(book);
+        r.setFlag(flag);*/
+        return new R(bookService.save(book));
+    }
 
-​	结果这么一折腾，全格式统一，现在后端发送给前端的数据格式就统一了，免去了不少前端解析数据的麻烦。
+    @PutMapping
+    public R update(@RequestBody Book book){
+        return new R(bookService.updateById(book));
+    }
+
+    @DeleteMapping("{id}")
+    public R delete(@PathVariable Integer id){
+        return new R(bookService.removeById(id));
+    }
+
+    @GetMapping("{id}")
+    public R getById(@PathVariable Integer id){
+        return new R(true,bookService.getById(id));
+    }
+
+    @GetMapping("{currentPage}/{pageSize}")
+    public R getPage(@PathVariable int currentPage,@PathVariable int pageSize){
+        IPage<Book> page = new Page<>(currentPage,pageSize);
+        return new R(true,bookService.page(page));
+    }
+}
+```
+
+经过这么一折腾，全格式统一，现在后端发送给前端的数据格式就统一了，免去了不少前端解析数据的麻烦。
 
 **总结**
 
@@ -2758,7 +2907,6 @@ public class R {
 
 3. 返回值结果模型类用于后端与前端进行数据格式统一，也称为前后端数据协议
 
-   
 
 ### 8、前后端联通性测试
 
