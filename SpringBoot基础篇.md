@@ -3393,7 +3393,7 @@ cancel(){
 
 ### 10、业务消息一致性处理
 
-目前的功能制作基本上达成了正常使用的情况，什么叫正常使用呢？也就是这个程序不出BUG，如果我们搞一个BUG出来，你会发现程序马上崩溃掉。比如后台手工抛出一个异常，看看前端接收到的数据什么样子
+目前的功能制作基本上达成了正常使用的情况，什么叫正常使用呢？也就是这个程序不出 BUG，如果我们搞一个BUG 出来，你会发现程序马上崩溃掉。比如后台手工抛出一个异常，看看前端接收到的数据什么样子
 
 ```json
 {
@@ -3404,7 +3404,7 @@ cancel(){
 }
 ```
 
-​	面对这种情况，前端的同学又不会了，这又是什么格式？怎么和之前的格式不一样？
+面对这种情况，前端的同学又不会了，这又是什么格式？怎么和之前的格式不一样？
 
 ```json
 {
@@ -3418,9 +3418,9 @@ cancel(){
 }
 ```
 
-​	看来不仅要对正确的操作数据格式做处理，还要对错误的操作数据格式做同样的格式处理
+看来不仅要对正确的操作数据格式做处理，还要对错误的操作数据格式做同样的格式处理
 
-​	首先在当前的数据结果中添加消息字段，用来兼容后台出现的操作消息
+首先在当前的数据结果中添加消息字段，用来兼容后台出现的操作消息
 
 ```JAVA
 @Data
@@ -3428,36 +3428,62 @@ public class R{
     private Boolean flag;
     private Object data;
     private String msg;		//用于封装消息
+    
+    //构造方法根据实际需要编写
+    public R(Boolean flag,Object data,String msg){
+    	this.flag = flag;
+    	this.data = data;
+    	this.msg = msg;
+    }
+    
+    public R(Boolean flag, String msg) {
+        this.flag = flag;
+        this.msg = msg;
+    }
+
+    public R(String msg) {
+        this.flag = false;
+        this.msg = msg;
+    }
 }
 ```
 
-​	后台代码也要根据情况做处理，当前是模拟的错误
+后台代码也要根据情况做处理，可以在表现层 Controller 中进行消息统一处理，当前是模拟的错误
+
+目的：国际化
 
 ```JAVA
 @PostMapping
 public R save(@RequestBody Book book) throws IOException {
-    Boolean flag = bookService.insert(book);
+    //return new R(bookService.save(book));
+    Boolean flag = bookService.save(book);
     return new R(flag , flag ? "添加成功^_^" : "添加失败-_-!");
 }
 ```
 
-​	然后在表现层做统一的异常处理，使用SpringMVC提供的异常处理器做统一的异常处理
+然后在表现层做统一的异常处理，使用 SpringMVC 提供的异常处理器做统一的异常处理，新建一个类作为异常处理器
 
 ```JAVA
+//@ControllerAdvice
 @RestControllerAdvice
 public class ProjectExceptionAdvice {
+    //拦截所有异常信息
+    //@ExceptionHandler
+    //拦截某个具体异常
     @ExceptionHandler(Exception.class)
     public R doOtherException(Exception ex){
         //记录日志
         //发送消息给运维
         //发送邮件给开发人员,ex对象发送给开发人员
         ex.printStackTrace();
-        return new R(false,null,"系统错误，请稍后再试！");
+        //return new R(false,null,"系统错误，请稍后再试！");
+        //return new R(false,"服务器故障，请稍后再试！");
+        return new R("服务器故障，请稍后再试！");
     }
 }
 ```
 
-​	页面上得到数据后，先判定是否有后台传递过来的消息，标志就是当前操作是否成功，如果返回操作结果false，就读取后台传递的消息
+页面上得到数据后，先判定是否有后台传递过来的消息，标志就是当前操作是否成功，如果返回操作结果 false，就读取后台传递的消息
 
 ```JS
 //添加
@@ -3469,7 +3495,29 @@ handleAdd () {
             this.dialogFormVisible = false;
             this.$message.success("添加成功");
         }else {
-            this.$message.error(res.data.msg);			//消息来自于后台传递过来，而非固定内容
+            //this.$message.error("添加失败");
+            this.$message.error(res.data.msg);//消息来自于后台传递过来，而非固定内容
+        }
+    }).finally(()=>{
+        this.getAll();
+    });
+},
+```
+
+**页面消息处理**
+
+```js
+//添加
+handleAdd () {
+	//发送ajax请求
+    axios.post("/books",this.formData).then((res)=>{
+        //如果操作成功，关闭弹层，显示数据
+        if(res.data.flag){
+            this.dialogFormVisible = false;
+            //this.$message.success("添加成功");
+            this.$message.success(res.data.msg);
+        }else {
+            this.$message.error(res.data.msg);//消息来自于后台传递过来，而非固定内容
         }
     }).finally(()=>{
         this.getAll();
@@ -3479,17 +3527,15 @@ handleAdd () {
 
 **总结**
 
-1. 使用注解@RestControllerAdvice定义SpringMVC异常处理器用来处理异常的
+1. 使用注解 @RestControllerAdvice 定义 SpringMVC 异常处理器用来处理异常的
 2. 异常处理器必须被扫描加载，否则无法生效
 3. 表现层返回结果的模型类中添加消息属性用来传递消息到页面
 
-​	
-
 ### 11、页面功能开发
 
-##### 	F-5.分页功能
+####	分页功能
 
-​		分页功能的制作用于替换前面的查询全部，其中要使用到elementUI提供的分页组件
+分页功能的制作用于替换前面的查询全部，其中要使用到 elementUI 提供的分页组件
 
 ```js
 <!--分页组件-->
@@ -3505,7 +3551,7 @@ handleAdd () {
 </div>
 ```
 
-​		为了配合分页组件，封装分页对应的数据模型
+为了配合分页组件，封装分页对应的数据模型
 
 ```vue
 data:{
@@ -3518,7 +3564,7 @@ data:{
 },
 ```
 
-​		修改查询全部功能为分页查询，通过路径变量传递页码信息参数
+修改查询全部功能为分页查询，通过路径变量传递页码信息参数
 
 ```JS
 getAll() {
@@ -3527,17 +3573,17 @@ getAll() {
 },
 ```
 
-​		后台提供对应的分页功能
+后台提供对应的分页功能
 
 ```JAVA
 @GetMapping("/{currentPage}/{pageSize}")
 public R getAll(@PathVariable Integer currentPage,@PathVariable Integer pageSize){
-    IPage<Book> pageBook = bookService.getPage(currentPage, pageSize);
-    return new R(null != pageBook ,pageBook);
+    IPage<Book> page = new Page<>(currentPage,pageSize);
+    return new R(true,bookService.page(page));
 }
 ```
 
-​		页面根据分页操作结果读取对应数据，并进行数据模型绑定
+页面根据分页操作结果读取对应数据，并进行数据模型绑定
 
 ```JS
 getAll() {
@@ -3550,28 +3596,28 @@ getAll() {
 },
 ```
 
-​		对切换页码操作设置调用当前分页操作
+对切换页码操作设置调用当前分页操作
 
 ```JS
 //切换页码
 handleCurrentChange(currentPage) {
+    //修改页码值为当前选中的页码值
     this.pagination.currentPage = currentPage;
+    //执行查询
     this.getAll();
 },
 ```
 
 **总结**
 
-1. 使用el分页组件
+1. 使用 el 分页组件
 2. 定义分页组件绑定的数据模型
 3. 异步调用获取分页数据
 4. 分页数据页面回显
 
+#### 删除功能维护
 
-
-##### 	F-6.删除功能维护
-
-​		由于使用了分页功能，当最后一页只有一条数据时，删除操作就会出现BUG，最后一页无数据但是独立展示，对分页查询功能进行后台功能维护，如果当前页码值大于最大页码值，重新执行查询。其实这个问题解决方案很多，这里给出比较简单的一种处理方案
+由于使用了分页功能，当最后一页只有一条数据时，删除操作就会出现 BUG，最后一页无数据但是独立展示，对分页查询功能进行后台功能维护，如果当前页码值大于最大页码值，重新执行查询。其实这个问题解决方案很多，这里给出比较简单的一种处理方案
 
 ```JAVA
 @GetMapping("{currentPage}/{pageSize}")
@@ -3585,11 +3631,9 @@ public R getPage(@PathVariable int currentPage,@PathVariable int pageSize){
 }
 ```
 
+#### 条件查询功能
 
-
-##### 	F-7.条件查询功能
-
-​		最后一个功能来做条件查询，其实条件查询可以理解为分页查询的时候除了携带分页数据再多带几个数据的查询。这些多带的数据就是查询条件。比较一下不带条件的分页查询与带条件的分页查询差别之处，这个功能就好做了
+最后一个功能来做条件查询，其实条件查询可以理解为分页查询的时候除了携带分页数据再多带几个数据的查询。这些多带的数据就是查询条件。比较一下不带条件的分页查询与带条件的分页查询差别之处，这个功能就好做了
 
 - 页面封装的数据：带不带条件影响的仅仅是一次性传递到后台的数据总量，由传递2个分页相关的数据转换成2个分页数据加若干个条件
 
