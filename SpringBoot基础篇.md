@@ -3640,115 +3640,128 @@ public R getPage(@PathVariable int currentPage,@PathVariable int pageSize){
 
 最后一个功能来做条件查询，其实条件查询可以理解为分页查询的时候除了携带分页数据再多带几个数据的查询。这些多带的数据就是查询条件。比较一下不带条件的分页查询与带条件的分页查询差别之处，这个功能就好做了
 
-- 页面封装的数据：带不带条件影响的仅仅是一次性传递到后台的数据总量，由传递2个分页相关的数据转换成2个分页数据加若干个条件
+- 页面封装的数据：带不带条件影响的仅仅是一次性传递到后台的数据总量，由传递 2 个分页相关的数据转换成2 个分页数据加若干个条件
 
-- 后台查询功能：查询时由不带条件，转换成带条件，反正不带条件的时候查询条件对象使用的是null，现在换成具体条件，差别不大
+- 后台查询功能：查询时由不带条件，转换成带条件，反正不带条件的时候查询条件对象使用的是 null，现在换成具体条件，差别不大
 
 - 查询结果：不管带不带条件，出来的数据只是有数量上的差别，其他都差别，这个可以忽略
 
-  经过上述分析，看来需要在页面发送请求的格式方面做一定的修改，后台的调用数据层操作时发送修改，其他没有区别
 
-  页面发送请求时，两个分页数据仍然使用路径变量，其他条件采用动态拼装url参数的形式传递
+经过上述分析，看来需要在页面发送请求的格式方面做一定的修改，后台的调用数据层操作时发送修改，其他没有区别
 
-  **页面封装查询条件字段**
+页面发送请求时，两个分页数据仍然使用路径变量，其他条件采用动态拼装 url 参数的形式传递
 
-  ```vue
-  pagination: {		
-  //分页相关模型数据
-  	currentPage: 1,		//当前页码
-  	pageSize:10,		//每页显示的记录数
-  	total:0,			//总记录数
-  	name: "",
-  	type: "",
-  	description: ""
-  },
-  ```
+**页面封装查询条件字段**
 
-  页面添加查询条件字段对应的数据模型绑定名称
+查询条件数据封装可采用单独封装，也可与分页操作混合封装，此处选择后者
 
-  ```HTML
-  <div class="filter-container">
-      <el-input placeholder="图书类别" v-model="pagination.type" class="filter-item"/>
-      <el-input placeholder="图书名称" v-model="pagination.name" class="filter-item"/>
-      <el-input placeholder="图书描述" v-model="pagination.description" class="filter-item"/>
-      <el-button @click="getAll()" class="dalfBut">查询</el-button>
-      <el-button type="primary" class="butT" @click="handleCreate()">新建</el-button>
-  </div>
-  ```
+```vue
+pagination: {		//分页相关模型数据
+	currentPage: 1,		//当前页码
+	pageSize:10,		//每页显示的记录数
+	total:0,			//总记录数
+	name: "",
+	type: "",
+	description: ""
+},
+```
 
-  将查询条件组织成url参数，添加到请求url地址中，这里可以借助其他类库快速开发，当前使用手工形式拼接，降低学习要求
+**页面添加查询条件字段对应的数据模型绑定名称**
 
-  ```JS
-  getAll() {
-      //1.获取查询条件,拼接查询条件
-      param = "?name="+this.pagination.name;
-      param += "&type="+this.pagination.type;
-      param += "&description="+this.pagination.description;
-      console.log("-----------------"+ param);
-      axios.get("/books/"+this.pagination.currentPage+"/"+this.pagination.pageSize+param).then((res) => {
-          this.dataList = res.data.data.records;
-      });
-  },
-  ```
+```HTML
+<div class="filter-container">
+    <el-input placeholder="图书类别" v-model="pagination.type" class="filter-item"/>
+    <el-input placeholder="图书名称" v-model="pagination.name" class="filter-item"/>
+    <el-input placeholder="图书描述" v-model="pagination.description" class="filter-item"/>
+    <el-button @click="getAll()" class="dalfBut">查询</el-button>
+    <el-button type="primary" class="butT" @click="handleCreate()">新建</el-button>
+</div>
+```
 
-  后台代码中定义实体类封查询条件
+**组织数据成为 get 请求发送的数据**
 
-  ```JAVA
-  @GetMapping("{currentPage}/{pageSize}")
-  public R getAll(@PathVariable int currentPage,@PathVariable int pageSize,Book book) {
-      System.out.println("参数=====>"+book);
-      IPage<Book> pageBook = bookService.getPage(currentPage,pageSize);
-      return new R(null != pageBook ,pageBook);
-  }
-  ```
+将查询条件组织成 url 参数，添加到请求 url 地址中，这里可以借助其他类库快速开发，当前使用手工形式拼接，降低学习要求。条件参数组织可以通过条件判定书写的更简洁
 
-  对应业务层接口与实现类进行修正
+```JS
+//分页查询
+//条件查询
+getAll() {
+    //获取查询条件，组织参数，拼接url地址
+    //console.log(this.pagination.type);
+    param = "?type=" + this.pagination.type;
+    param += "&name="+this.pagination.name;
+    param += "&description="+this.pagination.description;
+    console.log("-----------------"+ param);
 
-  ```JAVA
-  public interface IBookService extends IService<Book> {
-      IPage<Book> getPage(Integer currentPage,Integer pageSize,Book queryBook);
-  }
-  ```
+    //发送异步请求
+    axios.get("/books/"+this.pagination.currentPage+"/"+this.pagination.pageSize+param).then((res)=>{
+        this.pagination.pageSize = res.data.data.size;
+        this.pagination.currentPage = res.data.data.current;
+        this.pagination.total = res.data.data.total;
 
-  ```JAVA
-  @Service
-  public class BookServiceImpl2 extends ServiceImpl<BookDao,Book> implements IBookService {
-      public IPage<Book> getPage(Integer currentPage,Integer pageSize,Book queryBook){
-          IPage page = new Page(currentPage,pageSize);
-          LambdaQueryWrapper<Book> lqw = new LambdaQueryWrapper<Book>();
-          lqw.like(Strings.isNotEmpty(queryBook.getName()),Book::getName,queryBook.getName());
-          lqw.like(Strings.isNotEmpty(queryBook.getType()),Book::getType,queryBook.getType());
-          lqw.like(Strings.isNotEmpty(queryBook.getDescription()),Book::getDescription,queryBook.getDescription());
-          return bookDao.selectPage(page,lqw);
-      }
-  }
-  ```
+        this.dataList = res.data.data.records;
+    });
+},
+```
 
-  页面回显数据
+**后台代码中定义实体类封装查询条件**
 
-  ```js
-  getAll() {
-      //1.获取查询条件,拼接查询条件
-      param = "?name="+this.pagination.name;
-      param += "&type="+this.pagination.type;
-      param += "&description="+this.pagination.description;
-      console.log("-----------------"+ param);
-      axios.get("/books/"+this.pagination.currentPage+"/"+this.pagination.pageSize+param).then((res) => {
-          this.pagination.total = res.data.data.total;
-          this.pagination.currentPage = res.data.data.current;
-          this.pagination.pagesize = res.data.data.size;
-          this.dataList = res.data.data.records;
-      });
-  },
-  ```
+```JAVA
+@GetMapping("{currentPage}/{pageSize}")
+public R getPage(@PathVariable int currentPage,@PathVariable int pageSize,Book book){
+    //System.out.println("参数=====>"+book);
+    LambdaQueryWrapper<Book> lqw = new LambdaQueryWrapper<>();
+    lqw.like(Strings.isNotEmpty(book.getType()),Book::getType,book.getType());
+    lqw.like(Strings.isNotEmpty(book.getName()),Book::getName,book.getName());
+    lqw.like(Strings.isNotEmpty(book.getDescription()),Book::getDescription,book.getDescription());
+
+    IPage<Book> page = new Page<>(currentPage,pageSize);
+    //bookService.page(page);
+    bookService.page(page,lqw);
+
+    //如果当前页码值大于总页码值，则重新执行查询操作，使用最大页码值作为当前页码值
+    if (currentPage > page.getPages()){
+        page = new Page<>(page.getPages(),pageSize);
+        //bookService.page(page);
+        bookService.page(page,lqw);
+    }
+
+    return new R(null != page, page);
+}
+```
 
 **总结**
 
 1. 定义查询条件数据模型（当前封装到分页数据模型中）
 2. 异步调用分页功能并通过请求参数传递数据到后台
 
+### 12、案例总结
 
+1. pom.xml：配置起步依赖
 
-## 基础篇完结
+2. application.yml：设置数据源、端口、框架技术相关配置等
+3. dao：继承 BaseMapper、设置 @Mapper
+4. dao测试类
+5. service：调用数据层接口或 MyBatis-Plus 提供的接口快速开发
+6. service测试类
+7. controller：基于 Restful 开发，使用 Postman 测试跑通功能
+8. 页面：放置在 resources 目录下的 static 目录中
 
-​	基础篇到这里就全部结束了，在基础篇中带着大家学习了如果创建一个SpringBoot工程，然后学习了SpringBoot的基础配置语法格式，接下来对常见的市面上的实用技术做了整合，最后通过一个小的案例对前面学习的内容做了一个综合应用。整体来说就是一个最基本的入门，关于SpringBoot的实际开发其实接触的还是很少的，我们到实用篇和原理篇中继续吧，各位小伙伴，加油学习，再见。  
+# 四、基础篇完结
+
+基础篇到这里就全部结束了，在基础篇中带着大家学习了如何创建一个 SpringBoot 工程，然后学习了 SpringBoot的基础配置语法格式，接下来对常见的市面上的实用技术做了整合，最后通过一个小的案例对前面学习的内容做了一个综合应用。整体来说就是一个最基本的入门，关于 SpringBoot 的实际开发其实接触的还是很少的，我们到实用篇和原理篇中继续吧，各位小伙伴，加油学习，再见。  
+
+* 基础篇
+  * 能够创建 SpringBoot 工程
+  * 基于 SpringBoot 实现 ssm/ssmp 整合
+* 实用篇
+  * 运维实用篇
+    * 能够掌握 SpringBoot 程序多环境开发
+    * 能够基于 Linux 系统发布 SpringBoot 工程
+    * 能够解决线上灵活配置 SpringBoot 工程的需求
+  * 开发实用篇
+    * 能够基于 SpringBoot 整合任意第三方技术
+* 原理篇
+  * 掌握 SpringBoot 内部工作流程
+  * 理解 SpringBoot 整合第三方技术的原理
+  * 实现自定义开发整合第三方技术的组件
