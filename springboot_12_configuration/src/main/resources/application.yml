@@ -1,0 +1,17 @@
+servers:
+  # ipAddress: 127.0.0.1        # 驼峰
+  # ipaddress: 127.0.0.1
+  # ip_address: 127.0.0.1       # 下划线
+  ip-address: 127.0.0.1         # 烤肉串模式
+  # IPADDRESS: 127.0.0.1
+  # IP_ADDRESS: 127.0.0.1       # 常量
+  # IP_ADD_R-E_SS: 127.0.0.1
+  port: 2345
+  timeout: -1
+  serverTimeOut: 3
+  dataSize: 10
+  # dataSize: 10MB
+
+dataSource:
+  driverClassName: com:mysql:jdbc:Driver456
+  password: "0127"
